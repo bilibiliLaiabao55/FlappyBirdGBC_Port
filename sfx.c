@@ -44,7 +44,7 @@ void play_sfx_ch3(const uint8_t sfx_sequence[][5]) {
     sfx_end_ch3 = 0;
 }
 
-void sfx_system_update() {
+void sfx_system_update(void) {
     if(sfx_end_ch0 == 0){
         if (delay_sfx_sys_ch0 > 0) {
             --delay_sfx_sys_ch0;
@@ -124,7 +124,7 @@ void sfx_system_update() {
         }
     }
 }
-void sfx_sys_init(){
+void sfx_sys_init(void){
     sfx_end_ch0 = 1;
     sfx_sys_index_ch0 = 0;
     sfx_sys_index_ch0 = 0;
