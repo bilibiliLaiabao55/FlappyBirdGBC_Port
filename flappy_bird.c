@@ -1,12 +1,7 @@
-// Used:           14495
-// Total:          32768
-// Used(Per Cent): 44.24%
-
 #include <gb/gb.h>
 #include <gb/metasprites.h>
 #include <rand.h>
 #include <gb/cgb.h>
-#include <gb/sgb.h>
 #include "hUGEDriver/hUGEDriver.h"
 #include "music.c"
 #include "bgs/pipes.c"
@@ -14,10 +9,23 @@
 #include "bgs/bg.c"
 #include "bgs/bg.h"
 #include "bgs/title.c"
-#include "bgs/title.h"
+#include "bgs/title.h" 
 #include "bird.h"
+#include "sfx.c"
 #define BIRD_X 30
-
+//   NR10  NR11  NR12  NR13  NR14  D
+//   NR10  NR11  NR12  NR13  NR14  D
+const unsigned char sfx_jump[][6] = {
+    {0x27, 0x83, 0xF1, 0x40, 0x86, 0}
+};
+//   NR21  NR22  NR23  NR24  D
+const unsigned char sfx_pause[][5] = {
+    {0x41, 0xF1, 0xD6, 0xC6, 5},
+    {0x41, 0xF1, 0x1C, 0xC7, 5},
+    {0x41, 0xF1, 0xD6, 0xC6, 5},
+    {0x41, 0xF1, 0x1C, 0xC7, 5},
+    {0x41, 0xF1, 0xD6, 0xC6, 0},
+};
 UWORD seed;
 uint8_t gravity;
 uint8_t cgb_enable;
@@ -37,7 +45,6 @@ uint8_t bird_y;
 int8_t drop_speed;
 int8_t drop_speed_sub;
 uint8_t flip_or_not;
-static uint8_t sgb_buf[20];
 void main(void)
 {
     hUGE_init(&music_which_is_not_i_made);
@@ -46,9 +53,14 @@ void main(void)
     NR50_REG = 0xFF;
     NR51_REG = 0xFF;
     // disable_interrupts();
-    // add_VBL(update_map);
+    // disable_interrupts();
+    add_VBL(sfx_system_update);
+    add_VBL(hUGE_dosound);
     enable_interrupts();
     cgb_compatibility();
+    wait_vbl_done();
+    sfx_sys_init();
+    wait_vbl_done();
     if (_cpu == CGB_TYPE)
     {
         cpu_fast();
@@ -136,6 +148,7 @@ void main(void)
             {
                 hUGE_mute_channel(HT_CH3, HT_CH_PLAY);
                 hUGE_mute_channel(HT_CH4, HT_CH_PLAY);
+                
                 gravity = 1;
                 state = 1;
                 drop_speed = -2;
@@ -149,16 +162,18 @@ void main(void)
         {
             if ((joypad_state & J_A) && (!(joypad_state_last & J_A)))
             {
+                play_sfx_ch0(sfx_jump);
                 drop_speed = -2;
                 drop_speed_sub = -1;
             }
             if (joypad_state & J_START)
             {
+                play_sfx_ch1(sfx_pause);
                 hUGE_mute_channel(HT_CH1, HT_CH_MUTE);
                 hUGE_mute_channel(HT_CH2, HT_CH_MUTE);
                 hUGE_mute_channel(HT_CH3, HT_CH_MUTE);
                 hUGE_mute_channel(HT_CH4, HT_CH_MUTE);
-                hUGE_dosound();
+                delay(20);
                 waitpadup();
                 waitpad(J_START);
                 waitpadup();
@@ -212,7 +227,6 @@ void main(void)
             }
         }
         joypad_state_last = joypad_state;
-        hUGE_dosound();
         wait_vbl_done();
     }
 }
