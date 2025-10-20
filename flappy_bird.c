@@ -54,12 +54,12 @@ void main(void)
     NR51_REG = 0xFF;
     // disable_interrupts();
     // disable_interrupts();
-    add_VBL(sfx_system_update);
     add_VBL(hUGE_dosound);
     enable_interrupts();
     cgb_compatibility();
     wait_vbl_done();
     sfx_sys_init();
+    add_VBL(sfx_system_update);
     wait_vbl_done();
     if (_cpu == CGB_TYPE)
     {
